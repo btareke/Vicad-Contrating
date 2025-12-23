@@ -135,7 +135,7 @@ const createMobileMenu = () => {
                 border: none;
                 font-size: 1.5rem;
                 cursor: pointer;
-                color: var(--primary-color);
+                color: var(--accent-color);
             `;
             
             // Insert before nav-menu
