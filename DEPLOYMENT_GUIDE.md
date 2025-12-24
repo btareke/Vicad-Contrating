@@ -218,6 +218,129 @@ If you need to manually create or update the CNAME file:
 
 ## Troubleshooting
 
+### ❌ NotServedByPagesError: Domain Not Resolving to GitHub Pages
+
+**Error Message**: "Both vicadcontracting.com and its alternate name are improperly configured. Domain does not resolve to the GitHub Pages server."
+
+**This error means**: Your DNS records are not correctly pointing to GitHub's servers, or DNS hasn't propagated yet.
+
+#### Step-by-Step Fix:
+
+**1. Verify DNS Records in GoDaddy**
+
+Go to GoDaddy DNS management and check your records:
+
+**For Apex Domain (vicadcontracting.com):**
+- You MUST have exactly 4 A records with these IPs:
+  ```
+  185.199.108.153
+  185.199.109.153
+  185.199.110.153
+  185.199.111.153
+  ```
+- Each A record should have:
+  - **Type**: A
+  - **Name**: @ (or blank/empty)
+  - **Value**: One of the IPs above
+  - **TTL**: 600 seconds (or 1 hour)
+
+**For www Subdomain (www.vicadcontracting.com):**
+- You MUST have a CNAME record:
+  - **Type**: CNAME
+  - **Name**: www
+  - **Value**: `btareke.github.io` (your GitHub username + .github.io)
+  - **TTL**: 600 seconds
+
+**2. Remove Conflicting Records**
+
+- **Delete any other A records** pointing to different IPs
+- **Delete any CNAME records** for the apex domain (@)
+- **Remove any AAAA records** (IPv6) if they exist
+- **Remove any forwarding/redirects** that might interfere
+
+**3. Verify DNS Propagation**
+
+Check if your DNS is correctly configured:
+
+- Visit: https://www.whatsmydns.net
+- Enter your domain: `vicadcontracting.com`
+- Select **A** record type
+- Check multiple locations - all should show GitHub's IPs (185.199.108.153, etc.)
+
+**4. Check CNAME File in Repository**
+
+- Go to: https://github.com/btareke/Vicad-Contrating
+- Verify a `CNAME` file exists in the root directory
+- Open the CNAME file - it should contain ONLY:
+  ```
+  vicadcontracting.com
+  ```
+  OR
+  ```
+  www.vicadcontracting.com
+  ```
+- **Important**: 
+  - No `http://` or `https://`
+  - No trailing slash `/`
+  - Just the domain name
+
+**5. Remove and Re-add Custom Domain in GitHub**
+
+1. Go to: https://github.com/btareke/Vicad-Contrating/settings/pages
+2. Scroll to **Custom domain** section
+3. **Clear the domain field** (delete the domain)
+4. Click **Save**
+5. Wait 5 minutes
+6. **Re-enter your domain** in the Custom domain field
+7. Click **Save**
+
+**6. Wait for DNS Propagation**
+
+- DNS changes can take 1-48 hours to fully propagate
+- GitHub checks DNS every few hours
+- Be patient - this is normal!
+
+**7. Verify with Command Line (Optional)**
+
+You can check DNS from your computer:
+
+```bash
+# Check A records
+dig vicadcontracting.com +short
+
+# Should return:
+# 185.199.108.153
+# 185.199.109.153
+# 185.199.110.153
+# 185.199.111.153
+
+# Check CNAME for www
+dig www.vicadcontracting.com +short
+
+# Should return:
+# btareke.github.io
+```
+
+**8. Common Mistakes to Avoid**
+
+❌ **Wrong IP addresses** - Must use GitHub's exact IPs
+❌ **Missing A records** - Need all 4 A records for apex domain
+❌ **CNAME on apex** - Can't use CNAME for apex domain, only A records
+❌ **Wrong CNAME value** - Must be `btareke.github.io` exactly
+❌ **CNAME file missing** - Must exist in repository root
+❌ **CNAME file has wrong content** - Should only contain domain name
+❌ **Conflicting records** - Old DNS records still pointing elsewhere
+
+**9. Still Not Working?**
+
+If after 24-48 hours it's still not working:
+
+1. **Double-check all DNS records** match exactly
+2. **Verify CNAME file** is correct in repository
+3. **Try removing custom domain** from GitHub, wait 1 hour, then re-add
+4. **Contact GoDaddy support** to verify DNS is configured correctly
+5. **Check GitHub Actions** tab for any deployment errors
+
 ### DNS Not Propagating
 
 **Problem**: Domain not resolving after 24 hours
